@@ -1,0 +1,53 @@
+{
+	"name": "JasonDataFlow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Json1",
+						"type": "DatasetReference"
+					},
+					"name": "source"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText2",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Flatten"
+				},
+				{
+					"name": "Flatten1"
+				},
+				{
+					"name": "Flatten2"
+				},
+				{
+					"name": "Select1"
+				},
+				{
+					"name": "Select2"
+				},
+				{
+					"name": "Select3"
+				},
+				{
+					"name": "Union1"
+				},
+				{
+					"name": "Union2"
+				}
+			],
+			"script": "source(output(\n\t\tquiz as (sport as (q1 as (question as string, options as string[], answer as string)), maths as (q1 as (question as string, options as string[], answer as string), q2 as (question as string, options as string[], answer as string)))\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'singleDocument',\n\tpartitionBy('hash', 1)) ~> source\nsource foldDown(unroll(quiz.sport.q1.options),\n\tmapColumn(\n\t\tquestion = quiz.sport.q1.question,\n\t\toptions = quiz.sport.q1.options,\n\t\tanswer = quiz.sport.q1.answer\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten\nsource foldDown(unroll(quiz.maths.q1.options),\n\tmapColumn(\n\t\tquestion = quiz.maths.q1.question,\n\t\toptions = quiz.maths.q1.options,\n\t\tanswer = quiz.maths.q1.answer\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten1\nsource foldDown(unroll(quiz.maths.q2.options),\n\tmapColumn(\n\t\tquestion = quiz.maths.q2.question,\n\t\toptions = quiz.maths.q2.options,\n\t\tanswer = quiz.maths.q2.answer\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> Flatten2\nFlatten select(mapColumn(\n\t\tquestion,\n\t\toptions,\n\t\tanswer\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select1\nFlatten2 select(mapColumn(\n\t\tquestion,\n\t\toptions,\n\t\tanswer\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select2\nFlatten1 select(mapColumn(\n\t\tquestion,\n\t\toptions,\n\t\tanswer\n\t),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> Select3\nSelect1, Select2 union(byName: true)~> Union1\nSelect3, Union1 union(byName: true)~> Union2\nUnion2 sink(input(\n\t\tColumn_1 as string,\n\t\tColumn_2 as string,\n\t\tColumn_3 as string,\n\t\tColumn_4 as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['Question.csv'],\n\tmapColumn(\n\t\tquestion,\n\t\toptions,\n\t\tanswer\n\t),\n\tpartitionBy('hash', 1)) ~> sink1"
+		}
+	}
+}

@@ -1,0 +1,139 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [
+					{
+						"name": "Source",
+						"value": "files/input/"
+					},
+					{
+						"name": "Destination",
+						"value": "files/output/"
+					}
+				],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "input",
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['returnReference']"
+								},
+								"sink": {
+									"path": "$['returnReference']"
+								}
+							},
+							{
+								"source": {
+									"path": "$['orderReference']"
+								},
+								"sink": {
+									"path": "$['orderReference']"
+								}
+							},
+							{
+								"source": {
+									"path": "$['customerId']"
+								},
+								"sink": {
+									"path": "$['customerId']"
+								}
+							},
+							{
+								"source": {
+									"path": "['variantId']"
+								},
+								"sink": {
+									"path": "['variantId']"
+								}
+							},
+							{
+								"source": {
+									"path": "['quantity']"
+								},
+								"sink": {
+									"path": "['quantity']"
+								}
+							},
+							{
+								"source": {
+									"path": "['returnReason']['code']"
+								},
+								"sink": {
+									"path": "$['returnReason']['code']"
+								}
+							},
+							{
+								"source": {
+									"path": "['returnReason']['notes']"
+								},
+								"sink": {
+									"path": "$['returnReason']['notes']"
+								}
+							},
+							{
+								"source": {
+									"path": "$['timestamp']"
+								},
+								"sink": {
+									"path": "$['timestamp']"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "sourcejson",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "TargetJson",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2021-02-25T00:09:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
